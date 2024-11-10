@@ -200,7 +200,9 @@ for DuckDbConnectionPool
 }
 
 fn test_connection(conn: &r2d2::PooledConnection<DuckdbConnectionManager>) -> Result<()> {
-    conn.execute("INSTALL spatial; LOAD spatial;SELECT 1", []).context(UnableToConnectSnafu)?;
+    conn.execute("SELECT 1", []).context(UnableToConnectSnafu)?;
+    conn.execute("INSTALL spatial", []).context(UnableToConnectSnafu)?;
+    conn.execute("LOAD spatial", []).context(UnableToConnectSnafu)?;
     Ok(())
 }
 
