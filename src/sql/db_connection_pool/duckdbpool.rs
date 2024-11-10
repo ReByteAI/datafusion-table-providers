@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use duckdb::{vtab::arrow::ArrowVTab, AccessMode, DuckdbConnectionManager};
 use snafu::{prelude::*, ResultExt};
 use std::sync::Arc;
-
+use r2d2::ManageConnection;
 use super::{
     dbconnection::duckdbconn::{DuckDBAttachments, DuckDBParameter},
     DbConnectionPool, Mode, Result,
@@ -176,7 +176,7 @@ impl DuckDbConnectionPool {
 
 #[async_trait]
 impl DbConnectionPool<r2d2::PooledConnection<DuckdbConnectionManager>, DuckDBParameter>
-    for DuckDbConnectionPool
+for DuckDbConnectionPool
 {
     async fn connect(
         &self,
@@ -200,7 +200,7 @@ impl DbConnectionPool<r2d2::PooledConnection<DuckdbConnectionManager>, DuckDBPar
 }
 
 fn test_connection(conn: &r2d2::PooledConnection<DuckdbConnectionManager>) -> Result<()> {
-    conn.execute("SELECT 1", []).context(UnableToConnectSnafu)?;
+    conn.execute("INSTALL spatial; LOAD spatial;SELECT 1", []).context(UnableToConnectSnafu)?;
     Ok(())
 }
 
