@@ -14,7 +14,7 @@ use crate::util::{
 };
 
 /// Responsible for creating a `DuckDB` table along with any constraints and indexes
-pub(crate) struct TableCreator {
+pub struct TableCreator {
     table_name: String,
     schema: SchemaRef,
     pool: Arc<DuckDbConnectionPool>,
@@ -383,24 +383,24 @@ pub(crate) mod tests {
                 Arc::clone(&schema),
                 Arc::clone(&pool),
             )
-            .constraints(constraints)
-            .indexes(
-                vec![
-                    (
-                        ColumnReference::try_from("block_number").expect("valid column ref"),
-                        IndexType::Enabled,
-                    ),
-                    (
-                        ColumnReference::try_from("(log_index, transaction_hash)")
-                            .expect("valid column ref"),
-                        IndexType::Unique,
-                    ),
-                ]
-                .into_iter()
-                .collect(),
-            )
-            .create()
-            .expect("to create table");
+                .constraints(constraints)
+                .indexes(
+                    vec![
+                        (
+                            ColumnReference::try_from("block_number").expect("valid column ref"),
+                            IndexType::Enabled,
+                        ),
+                        (
+                            ColumnReference::try_from("(log_index, transaction_hash)")
+                                .expect("valid column ref"),
+                            IndexType::Unique,
+                        ),
+                    ]
+                        .into_iter()
+                        .collect(),
+                )
+                .create()
+                .expect("to create table");
 
             let arc_created_table = Arc::new(created_table);
 
@@ -446,17 +446,17 @@ pub(crate) mod tests {
                 Arc::clone(&schema),
                 Arc::clone(&pool),
             )
-            .constraints(constraints)
-            .indexes(
-                vec![(
-                    ColumnReference::try_from("block_number").expect("valid column ref"),
-                    IndexType::Enabled,
-                )]
-                .into_iter()
-                .collect(),
-            )
-            .create()
-            .expect("to create table");
+                .constraints(constraints)
+                .indexes(
+                    vec![(
+                        ColumnReference::try_from("block_number").expect("valid column ref"),
+                        IndexType::Enabled,
+                    )]
+                        .into_iter()
+                        .collect(),
+                )
+                .create()
+                .expect("to create table");
 
             let arc_created_table = Arc::new(created_table);
 
