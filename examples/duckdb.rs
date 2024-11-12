@@ -23,6 +23,11 @@ async fn main() {
         .await
         .expect("to create table provider");
 
+    let writer = duckdb_table_factory
+        .read_write_table_provider(TableReference::bare("companies"))
+        .await
+        .expect("to create table provider");
+
     let projects_table = duckdb_table_factory
         .table_provider(TableReference::bare("projects"))
         .await

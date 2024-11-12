@@ -105,7 +105,7 @@ impl TableProvider for DuckDBTableWriter {
 }
 
 #[derive(Clone)]
-pub(crate) struct DuckDBDataSink {
+pub struct DuckDBDataSink {
     duckdb: Arc<DuckDB>,
     overwrite: InsertOp,
     on_conflict: Option<OnConflict>,
@@ -183,9 +183,9 @@ impl DataSink for DuckDBDataSink {
                 &[batch.clone()],
                 self.duckdb.constraints(),
             )
-            .await
-            .context(super::ConstraintViolationSnafu)
-            .map_err(to_datafusion_error)?;
+                .await
+                .context(super::ConstraintViolationSnafu)
+                .map_err(to_datafusion_error)?;
 
             if let Err(send_error) = batch_tx.send(batch).await {
                 match duckdb_write_handle.await {

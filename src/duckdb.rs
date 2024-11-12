@@ -42,7 +42,7 @@ use self::{creator::TableCreator, sql_table::DuckDBTable, write::DuckDBTableWrit
 #[cfg(feature = "duckdb-federation")]
 mod federation;
 
-mod creator;
+pub mod creator;
 mod sql_table;
 pub mod write;
 
