@@ -224,7 +224,7 @@ impl DataSink for DuckDBDataSink {
 }
 
 impl DuckDBDataSink {
-    pub(crate) fn new(
+    pub fn new(
         duckdb: Arc<DuckDB>,
         overwrite: bool,
         on_conflict: Option<OnConflict>,
