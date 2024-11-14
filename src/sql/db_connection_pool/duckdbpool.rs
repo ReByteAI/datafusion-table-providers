@@ -201,21 +201,11 @@ for DuckDbConnectionPool
 
 fn test_connection(conn: &r2d2::PooledConnection<DuckdbConnectionManager>) -> Result<()> {
     conn.execute("SELECT 1", []).context(UnableToConnectSnafu)?;
-    // conn.execute("INSTALL spatial", []).context(UnableToConnectSnafu)?;
-    // conn.execute("LOAD spatial", []).context(UnableToConnectSnafu)?;
     Ok(())
 }
 
 fn get_config(access_mode: &AccessMode) -> Result<duckdb::Config> {
     let config = duckdb::Config::default()
-        .max_memory("16GB")?
-        .threads(20)?
-        .default_null_order(DefaultNullOrder::NullsLast)?
-        .default_order(DefaultOrder::Desc)?
-        .enable_external_access(true)?
-        .enable_object_cache(false)?
-        .enable_autoload_extension(true)?
-        .allow_unsigned_extensions()?
         .access_mode(match access_mode {
             AccessMode::ReadOnly => duckdb::AccessMode::ReadOnly,
             AccessMode::ReadWrite => duckdb::AccessMode::ReadWrite,
