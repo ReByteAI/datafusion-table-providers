@@ -313,7 +313,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         None => builder.append_null(),
                     }
                 }
-                Type::JSON => {
+                Type::JSON | Type::JSONB => {
                     let Some(builder) = builder else {
                         return NoBuilderForIndexSnafu { index: i }.fail();
                     };
@@ -832,7 +832,7 @@ fn map_column_type_to_data_type(column_type: &Type) -> Option<DataType> {
         Type::TEXT | Type::VARCHAR | Type::BPCHAR | Type::UUID => Some(DataType::Utf8),
         Type::BYTEA => Some(DataType::Binary),
         Type::BOOL => Some(DataType::Boolean),
-        Type::JSON => Some(DataType::LargeUtf8),
+        Type::JSON | Type::JSONB => Some(DataType::LargeUtf8),
         // Inspect the scale from the first row. Precision will always be 38 for Decimal128.
         Type::NUMERIC => None,
         Type::TIMESTAMPTZ => Some(DataType::Timestamp(
