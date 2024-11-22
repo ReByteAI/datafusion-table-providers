@@ -82,17 +82,17 @@ postgres = ["dep:tokio-postgres", "dep:uuid", "dep:postgres-native-tls", "dep:bb
 sqlite = ["dep:rusqlite", "dep:tokio-rusqlite"]
 duckdb = ["dep:duckdb", "dep:r2d2", "dep:uuid", "dep:dyn-clone", "dep:async-stream", "dep:arrow-schema"]
 flight = [
-  "dep:arrow-array",
-  "dep:arrow-flight",
-  "dep:arrow-schema",
-  "dep:base64",
-  "dep:bytes",
-  "dep:datafusion-expr",
-  "dep:datafusion-physical-expr",
-  "dep:datafusion-physical-plan",
-  "dep:datafusion-proto",
-  "dep:prost",
-  "dep:tonic",
+    "dep:arrow-array",
+    "dep:arrow-flight",
+    "dep:arrow-schema",
+    "dep:base64",
+    "dep:bytes",
+    "dep:datafusion-expr",
+    "dep:datafusion-physical-expr",
+    "dep:datafusion-physical-plan",
+    "dep:datafusion-proto",
+    "dep:prost",
+    "dep:tonic",
 ]
 duckdb-federation = ["duckdb"]
 sqlite-federation = ["sqlite"]
@@ -102,8 +102,8 @@ postgres-federation = ["postgres"]
 datafusion-federation = { git = "https://github.com/spiceai/datafusion-federation.git", rev = "5af0df83c2cd1d3f82f293b066b401a4dfd4064b" }
 duckdb = { git = "https://github.com/spiceai/duckdb-rs.git", rev = "d6f8c3e0dc1ba073a86756eba4dacf044dfa892d" }
 
-datafusion = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee"}
-datafusion-expr =  { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee"}
-datafusion-physical-expr =  { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee"}
-datafusion-physical-plan =  { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee"}
-datafusion-proto =  { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee"}
+datafusion = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee" }
+datafusion-expr = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee" }
+datafusion-physical-expr = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee" }
+datafusion-physical-plan = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee" }
+datafusion-proto = { git = "https://github.com/spiceai/datafusion.git", rev = "aaa46be22cff778e0e618b5eaeee3c2830d4e7ee" }
