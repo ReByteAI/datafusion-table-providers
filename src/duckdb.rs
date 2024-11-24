@@ -31,10 +31,10 @@ use datafusion::{
     sql::TableReference,
 };
 use duckdb::{AccessMode, DuckdbConnectionManager, Transaction};
+use futures::poll;
 use itertools::Itertools;
 use snafu::prelude::*;
 use std::{cmp, collections::HashMap, sync::Arc};
-use futures::poll;
 use tokio::sync::Mutex;
 
 use self::{creator::TableCreator, sql_table::DuckDBTable, write::DuckDBTableWriter};
@@ -467,7 +467,7 @@ fn remove_option(options: &mut HashMap<String, String>, key: &str) -> Option<Str
 }
 
 pub struct DuckDBTableFactory {
-    pool: Arc<DuckDbConnectionPool>,
+    pub pool: Arc<DuckDbConnectionPool>,
 }
 
 impl DuckDBTableFactory {
