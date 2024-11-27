@@ -31,6 +31,7 @@ use datafusion::{
     sql::TableReference,
 };
 use duckdb::{AccessMode, DuckdbConnectionManager, Transaction};
+use futures::poll;
 use itertools::Itertools;
 use snafu::prelude::*;
 use std::{cmp, collections::HashMap, sync::Arc};
@@ -41,7 +42,7 @@ use self::{creator::TableCreator, sql_table::DuckDBTable, write::DuckDBTableWrit
 #[cfg(feature = "duckdb-federation")]
 mod federation;
 
-mod creator;
+pub mod creator;
 mod sql_table;
 pub mod write;
 
@@ -200,6 +201,16 @@ impl DuckDBTableProviderFactory {
         instances.insert(key, pool.clone());
 
         Ok(pool)
+    }
+
+    pub async fn remove_instance(&self, db_path: impl Into<Arc<str>>) -> Result<()> {
+        let db_path = db_path.into();
+        let key = DbInstanceKey::file(Arc::clone(&db_path));
+        let mut instances = self.instances.lock().await;
+
+        if let Some(instance) = instances.remove(&key) {}
+
+        Ok(())
     }
 
     pub async fn get_or_init_file_instance(
@@ -466,7 +477,7 @@ fn remove_option(options: &mut HashMap<String, String>, key: &str) -> Option<Str
 }
 
 pub struct DuckDBTableFactory {
-    pool: Arc<DuckDbConnectionPool>,
+    pub pool: Arc<DuckDbConnectionPool>,
 }
 
 impl DuckDBTableFactory {
