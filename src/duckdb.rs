@@ -34,6 +34,7 @@ use duckdb::{AccessMode, DuckdbConnectionManager, Transaction};
 use itertools::Itertools;
 use snafu::prelude::*;
 use std::{cmp, collections::HashMap, sync::Arc};
+use futures::poll;
 use tokio::sync::Mutex;
 
 use self::{creator::TableCreator, sql_table::DuckDBTable, write::DuckDBTableWriter};
