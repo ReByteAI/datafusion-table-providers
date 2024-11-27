@@ -239,11 +239,13 @@ fn columns_meta_to_schema(columns_meta: Vec<Row>) -> Result<SchemaRef> {
             column_use_large_str_or_blob,
             precision,
             scale,
-        )
-        .context(UnsupportedDataTypeSnafu {
-            column_name: column_name.clone(),
-            data_type,
-        })?;
+        // )
+        // .context(UnsupportedDataTypeSnafu {
+        //     column_name: column_name.clone(),
+        //     data_type,
+        // })?;
+        )?
+        .context(UnsupportedDataTypeSnafu { data_type })?;
 
         fields.push(Field::new(&column_name, arrow_data_type, true));
     }
