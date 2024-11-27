@@ -28,14 +28,16 @@ pub enum Error {
     #[snafu(display("{source}"))]
     UnableToGetSchema { source: GenericError },
 
-    #[snafu(display("The field '{field_name}' has an unsupported data type: {data_type}.\nReport a bug to request support for this data type: https://github.com/datafusion-contrib/datafusion-table-providers/issues"))]
+    // #[snafu(display("The field '{field_name}' has an unsupported data type: {data_type}.\nReport a bug to request support for this data type: https://github.com/datafusion-contrib/datafusion-table-providers/issues"))]
+    #[snafu(display("The field '{field_name}' has an unsupported data type: {data_type}"))]
     #[cfg(feature = "duckdb")]
     UnsupportedDataType {
         data_type: DataType,
         field_name: String,
     },
 
-    #[snafu(display("Failed to execute query.\n{source}"))]
+    // #[snafu(display("Failed to execute query.\n{source}"))]
+    #[snafu(display("Unable to query arrow: {source}"))]
     UnableToQueryArrow { source: GenericError },
 
     #[snafu(display(

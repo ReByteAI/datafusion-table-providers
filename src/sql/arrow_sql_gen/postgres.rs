@@ -85,6 +85,15 @@ pub enum Error {
 
     #[snafu(display("No column name for index: {index}"))]
     NoColumnNameForIndex { index: usize },
+
+    #[snafu(display("{error}"))]
+    Unimplemented { error: String },
+}
+
+macro_rules! unimplemented_err {
+  ($($arg:tt)*) => {
+    return Err(Error::Unimplemented { error: format!($($arg)*) })
+  };
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -172,7 +181,7 @@ macro_rules! handle_composite_types {
                     );
                 }
             )*
-            _ => unimplemented!("Unsupported field type {:?}", $field_type),
+            _ => unimplemented_err!("Unsupported field type {:?}", $field_type),
         }
     }
 }
@@ -212,7 +221,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                     None
                 }
             } else {
-                map_column_type_to_data_type(column_type)
+                map_column_type_to_data_type(column_type)?
             };
 
             match &data_type {
@@ -313,7 +322,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         None => builder.append_null(),
                     }
                 }
-                Type::JSON => {
+                Type::JSON | Type::JSONB => {
                     let Some(builder) = builder else {
                         return NoBuilderForIndexSnafu { index: i }.fail();
                     };
@@ -746,7 +755,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         let fields = composite_type.fields();
                         for (idx, field) in fields.iter().enumerate() {
                             let field_name = field.name();
-                            let Some(field_type) = map_column_type_to_data_type(field.type_())
+                            let Some(field_type) = map_column_type_to_data_type(field.type_())?
                             else {
                                 return FailedToDowncastBuilderSnafu {
                                     postgres_type: format!("{}", field.type_()),
@@ -802,7 +811,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         }
                     }
                     _ => {
-                        unimplemented!("Unsupported type {:?} for column index {i}", postgres_type,)
+                      unimplemented_err!("Unsupported type {:?} for column index {i}", postgres_type,)
                     }
                 },
             }
@@ -822,8 +831,8 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
     }
 }
 
-fn map_column_type_to_data_type(column_type: &Type) -> Option<DataType> {
-    match *column_type {
+fn map_column_type_to_data_type(column_type: &Type) -> Result<Option<DataType>> {
+    Ok(match *column_type {
         Type::INT2 => Some(DataType::Int16),
         Type::INT4 => Some(DataType::Int32),
         Type::INT8 | Type::MONEY => Some(DataType::Int64),
@@ -832,7 +841,7 @@ fn map_column_type_to_data_type(column_type: &Type) -> Option<DataType> {
         Type::TEXT | Type::VARCHAR | Type::BPCHAR | Type::UUID => Some(DataType::Utf8),
         Type::BYTEA => Some(DataType::Binary),
         Type::BOOL => Some(DataType::Boolean),
-        Type::JSON => Some(DataType::LargeUtf8),
+        Type::JSON | Type::JSONB => Some(DataType::LargeUtf8),
         // Inspect the scale from the first row. Precision will always be 38 for Decimal128.
         Type::NUMERIC => None,
         Type::TIMESTAMPTZ => Some(DataType::Timestamp(
@@ -897,12 +906,12 @@ fn map_column_type_to_data_type(column_type: &Type) -> Option<DataType> {
                 let mut arrow_fields = Vec::new();
                 for field in fields {
                     let field_name = field.name();
-                    let field_type = map_column_type_to_data_type(field.type_());
+                    let field_type = map_column_type_to_data_type(field.type_())?;
                     match field_type {
                         Some(field_type) => {
                             arrow_fields.push(Field::new(field_name, field_type, true));
                         }
-                        None => unimplemented!(
+                        None => unimplemented_err!(
                             "Unsupported column type in nested struct {:?}",
                             field_type
                         ),
@@ -914,9 +923,9 @@ fn map_column_type_to_data_type(column_type: &Type) -> Option<DataType> {
                 Box::new(DataType::Int8),
                 Box::new(DataType::Utf8),
             )),
-            _ => unimplemented!("Unsupported column type {:?}", column_type),
+            _ => unimplemented_err!("Unsupported column type {:?}", column_type),
         },
-    }
+    })
 }
 
 pub(crate) fn map_data_type_to_column_type_postgres(
