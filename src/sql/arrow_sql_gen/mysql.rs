@@ -54,6 +54,15 @@ pub enum Error {
 
     #[snafu(display("No column name for index: {index}"))]
     NoColumnNameForIndex { index: usize },
+
+    #[snafu(display("{error}"))]
+    Unimplemented { error: String },
+}
+
+macro_rules! unimplemented_err {
+  ($($arg:tt)*) => {
+    return Err(Error::Unimplemented { error: format!($($arg)*) })
+  };
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -126,7 +135,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                 column_use_large_str_or_blob,
                 decimal_precision,
                 decimal_scale,
-            );
+            )?;
 
             arrow_fields.push(
                 data_type
@@ -485,7 +494,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         None => builder.append_null(),
                     }
                 }
-                _ => unimplemented!("Unsupported column type {:?}", mysql_type),
+                _ => unimplemented_err!("Unsupported column type {:?}", mysql_type),
             }
         }
     }
@@ -508,8 +517,8 @@ pub fn map_column_to_data_type(
     column_use_large_str_or_blob: bool,
     column_decimal_precision: Option<u8>,
     column_decimal_scale: Option<i8>,
-) -> Option<DataType> {
-    match column_type {
+) -> Result<Option<DataType>> {
+    Ok(match column_type {
         ColumnType::MYSQL_TYPE_NULL => Some(DataType::Null),
         ColumnType::MYSQL_TYPE_BIT => Some(DataType::UInt64),
         ColumnType::MYSQL_TYPE_TINY => Some(DataType::Int8),
@@ -521,7 +530,7 @@ pub fn map_column_to_data_type(
         // Decimal precision must be a value between 0x00 - 0x51, so it's safe to unwrap_or_default here
         ColumnType::MYSQL_TYPE_DECIMAL | ColumnType::MYSQL_TYPE_NEWDECIMAL => {
             if column_decimal_precision.unwrap_or_default() > 38 {
-                return Some(DataType::Decimal256(column_decimal_precision.unwrap_or_default(), column_decimal_scale.unwrap_or_default()));
+                return Ok(Some(DataType::Decimal256(column_decimal_precision.unwrap_or_default(), column_decimal_scale.unwrap_or_default())));
             } 
             Some(DataType::Decimal128(column_decimal_precision.unwrap_or_default(), column_decimal_scale.unwrap_or_default()))
         },
@@ -569,9 +578,9 @@ pub fn map_column_to_data_type(
         | ColumnType::MYSQL_TYPE_TINY_BLOB
         | ColumnType::MYSQL_TYPE_MEDIUM_BLOB
         | ColumnType::MYSQL_TYPE_GEOMETRY => {
-            unimplemented!("Unsupported column type {:?}", column_type)
+          unimplemented_err!("Unsupported column type {:?}", column_type)
         }
-    }
+    })
 }
 
 fn to_decimal_128(decimal: &BigDecimal, scale: i64) -> Option<i128> {
