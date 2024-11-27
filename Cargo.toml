@@ -25,11 +25,11 @@ datafusion-physical-expr = { version = "43", optional = true }
 datafusion-physical-plan = { version = "43", optional = true }
 datafusion-proto = { version = "43", optional = true }
 duckdb = { version = "1", features = [
-  "bundled",
-  "r2d2",
-  "vtab",
-  "vtab-arrow",
-  "appender-arrow",
+    "bundled",
+    "r2d2",
+    "vtab",
+    "vtab-arrow",
+    "appender-arrow",
 ], optional = true }
 fallible-iterator = "0.3.0"
 futures = "0.3.30"
@@ -52,7 +52,7 @@ bb8 = { version = "0.8", optional = true }
 bb8-postgres = { version = "0.8", optional = true }
 native-tls = { version = "0.2.11", optional = true }
 trust-dns-resolver = "0.23.2"
-url = "2.5.1"
+url = "2.4.1"
 pem = { version = "3.0.4", optional = true }
 tokio-rusqlite = { version = "0.5.1", optional = true }
 tonic = { version = "0.12.2", optional = true }
@@ -82,17 +82,29 @@ postgres = ["dep:tokio-postgres", "dep:uuid", "dep:postgres-native-tls", "dep:bb
 sqlite = ["dep:rusqlite", "dep:tokio-rusqlite"]
 duckdb = ["dep:duckdb", "dep:r2d2", "dep:uuid", "dep:dyn-clone", "dep:async-stream", "dep:arrow-schema"]
 flight = [
-  "dep:arrow-array",
-  "dep:arrow-flight",
-  "dep:arrow-schema",
-  "dep:base64",
-  "dep:bytes",
-  "dep:datafusion-expr",
-  "dep:datafusion-physical-expr",
-  "dep:datafusion-physical-plan",
-  "dep:datafusion-proto",
-  "dep:prost",
-  "dep:tonic",
+#  "dep:arrow-array",
+#  "dep:arrow-flight",
+#  "dep:arrow-schema",
+#  "dep:base64",
+#  "dep:bytes",
+#  "dep:datafusion-expr",
+#  "dep:datafusion-physical-expr",
+#  "dep:datafusion-physical-plan",
+#  "dep:datafusion-proto",
+#  "dep:prost",
+#  "dep:tonic",
+    "dep:arrow-array",
+    "dep:arrow-flight",
+    "dep:arrow-schema",
+    "dep:base64",
+    "dep:bytes",
+    "dep:datafusion-expr",
+    "dep:datafusion-physical-expr",
+    "dep:datafusion-physical-plan",
+    "dep:datafusion-proto",
+    "dep:prost",
+    "dep:serde",
+    "dep:tonic",
 ]
 duckdb-federation = ["duckdb"]
 sqlite-federation = ["sqlite"]
