@@ -299,12 +299,20 @@ fn data_type_is_unsupported(data_type: &DataType) -> bool {
         | DataType::LargeList(inner_field) => {
             match inner_field.data_type() {
                 dt if dt.is_primitive() => false,
+<<<<<<< HEAD
                 // DataType::Utf8
                 // | DataType::Binary
                 // | DataType::Utf8View
                 // | DataType::BinaryView
                 // | DataType::Boolean => false,
                 DataType::Utf8 | DataType::Binary => false,
+=======
+                DataType::Utf8
+                | DataType::Binary
+                | DataType::Utf8View
+                | DataType::BinaryView
+                | DataType::Boolean => false,
+>>>>>>> 57c92d8 (Upgrade to DataFusion 43 (#167))
                 _ => true, // nested lists don't support anything else yet
             }
         }
