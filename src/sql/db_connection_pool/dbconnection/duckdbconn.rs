@@ -299,11 +299,12 @@ fn data_type_is_unsupported(data_type: &DataType) -> bool {
         | DataType::LargeList(inner_field) => {
             match inner_field.data_type() {
                 dt if dt.is_primitive() => false,
-                DataType::Utf8
-                | DataType::Binary
-                | DataType::Utf8View
-                | DataType::BinaryView
-                | DataType::Boolean => false,
+                // DataType::Utf8
+                // | DataType::Binary
+                // | DataType::Utf8View
+                // | DataType::BinaryView
+                // | DataType::Boolean => false,
+                DataType::Utf8 | DataType::Binary => false,
                 _ => true, // nested lists don't support anything else yet
             }
         }

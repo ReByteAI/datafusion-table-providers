@@ -1,8 +1,3 @@
-use async_trait::async_trait;
-use duckdb::{vtab::arrow::ArrowVTab, AccessMode, DefaultNullOrder, DefaultOrder, DuckdbConnectionManager};
-use snafu::{prelude::*, ResultExt};
-use std::sync::Arc;
-use r2d2::ManageConnection;
 use super::{
     dbconnection::duckdbconn::{DuckDBAttachments, DuckDBParameter},
     DbConnectionPool, Mode, Result,
@@ -14,6 +9,13 @@ use crate::{
     },
     InvalidTypeAction,
 };
+use async_trait::async_trait;
+use duckdb::{
+    vtab::arrow::ArrowVTab, AccessMode, DefaultNullOrder, DefaultOrder, DuckdbConnectionManager,
+};
+use r2d2::ManageConnection;
+use snafu::{prelude::*, ResultExt};
+use std::sync::Arc;
 
 #[derive(Debug, Snafu)]
 pub enum Error {
@@ -195,7 +197,7 @@ impl DuckDbConnectionPool {
 
 #[async_trait]
 impl DbConnectionPool<r2d2::PooledConnection<DuckdbConnectionManager>, DuckDBParameter>
-for DuckDbConnectionPool
+    for DuckDbConnectionPool
 {
     async fn connect(
         &self,
