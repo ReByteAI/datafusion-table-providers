@@ -83,7 +83,6 @@ postgres = ["dep:tokio-postgres", "dep:uuid", "dep:postgres-native-tls", "dep:bb
 sqlite = ["dep:rusqlite", "dep:tokio-rusqlite"]
 duckdb = ["dep:duckdb", "dep:r2d2", "dep:uuid", "dep:dyn-clone", "dep:async-stream", "dep:arrow-schema"]
 flight = [
-    <<<<<<< HEAD
     #  "dep:arrow-array",
     #  "dep:arrow-flight",
     #  "dep:arrow-schema",
