@@ -98,6 +98,9 @@ pub enum Error {
     #[snafu(display("Invalid SQLite busy_timeout value"))]
     InvalidBusyTimeoutValue { value: String },
 
+    #[snafu(display("Invalid memory key"))]
+    InvalidMemoryKey {},
+
     #[snafu(display(
         "Unable to parse SQLite busy_timeout parameter, ensure it is a valid duration"
     ))]
@@ -179,7 +182,11 @@ impl SqliteTableProviderFactory {
     ) -> Result<SqliteConnectionPool> {
         let db_path = db_path.into();
         let key = match mode {
-            Mode::Memory => DbInstanceKey::memory("test".to_string()),
+            Mode::Memory => {
+                // Err(Error::InvalidMemoryKey {})
+                // DbInstanceKey::memory("test".to_string());
+                unimplemented!("Memory mode is not supported yet")
+            }
             Mode::File => DbInstanceKey::file(Arc::clone(&db_path)),
         };
         let mut instances = self.instances.lock().await;

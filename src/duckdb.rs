@@ -61,6 +61,9 @@ pub enum Error {
         source: sql_provider_datafusion::Error,
     },
 
+    #[snafu(display("DuckDBInvalidMemoryKey"))]
+    DuckDBInvalidMemoryKey {},
+
     #[snafu(display("Unable to downcast DbConnection to DuckDbConnection"))]
     UnableToDowncastDbConnection {},
 
@@ -129,6 +132,7 @@ pub struct DuckDBTableProviderFactory {
 }
 
 const DUCKDB_DB_PATH_PARAM: &str = "open";
+const DUCKDB_MEMORY_KEY_PARAM: &str = "memory_key";
 const DUCKDB_DB_BASE_FOLDER_PARAM: &str = "data_directory";
 const DUCKDB_ATTACH_DATABASES_PARAM: &str = "attach_databases";
 
@@ -184,6 +188,19 @@ impl DuckDBTableProviderFactory {
             .unwrap_or(default_filepath);
 
         Ok(filepath.to_string())
+    }
+
+    pub fn duckdb_memory_key(
+        &self,
+        options: &mut HashMap<String, String>,
+    ) -> Result<String, Error> {
+        let options = util::remove_prefix_from_hashmap_keys(options.clone(), "duckdb_");
+
+        let memory_key = options
+            .get(DUCKDB_MEMORY_KEY_PARAM)
+            .unwrap_or(Err(Error::DuckDBInvalidMemoryKey {})?);
+
+        Ok(memory_key.to_string())
     }
 
     pub async fn get_or_init_memory_instance(
@@ -296,10 +313,15 @@ impl TableProviderFactory for DuckDBTableProviderFactory {
                     .await
                     .map_err(to_datafusion_error)?
             }
-            Mode::Memory => self
-                .get_or_init_memory_instance("test".to_string())
-                .await
-                .map_err(to_datafusion_error)?,
+            Mode::Memory => {
+                let memory_key = self
+                    .duckdb_memory_key(&mut options)
+                    .map_err(to_datafusion_error)?;
+
+                self.get_or_init_memory_instance(memory_key)
+                    .await
+                    .map_err(to_datafusion_error)?
+            }
         };
 
         let read_pool = match &mode {
