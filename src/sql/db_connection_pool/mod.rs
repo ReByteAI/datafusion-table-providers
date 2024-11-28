@@ -56,12 +56,12 @@ pub enum DbInstanceKey {
     /// The database is a file on disk, with the given path.
     File(Arc<str>),
     /// The database is in memory.
-    Memory,
+    Memory(Arc<str>),
 }
 
 impl DbInstanceKey {
-    pub fn memory() -> Self {
-        DbInstanceKey::Memory
+    pub fn memory(memory_key: String) -> Self {
+        DbInstanceKey::Memory(memory_key.into())
     }
 
     pub fn file(path: Arc<str>) -> Self {

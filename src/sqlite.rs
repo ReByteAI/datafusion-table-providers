@@ -179,7 +179,7 @@ impl SqliteTableProviderFactory {
     ) -> Result<SqliteConnectionPool> {
         let db_path = db_path.into();
         let key = match mode {
-            Mode::Memory => DbInstanceKey::memory(),
+            Mode::Memory => DbInstanceKey::memory("test".to_string()),
             Mode::File => DbInstanceKey::file(Arc::clone(&db_path)),
         };
         let mut instances = self.instances.lock().await;

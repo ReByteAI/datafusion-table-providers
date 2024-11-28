@@ -186,8 +186,11 @@ impl DuckDBTableProviderFactory {
         Ok(filepath.to_string())
     }
 
-    pub async fn get_or_init_memory_instance(&self) -> Result<DuckDbConnectionPool> {
-        let key = DbInstanceKey::memory();
+    pub async fn get_or_init_memory_instance(
+        &self,
+        db_memory_key: String,
+    ) -> Result<DuckDbConnectionPool> {
+        let key = DbInstanceKey::memory(db_memory_key);
         let mut instances = self.instances.lock().await;
 
         if let Some(instance) = instances.get(&key) {
@@ -198,7 +201,7 @@ impl DuckDBTableProviderFactory {
             .context(DbConnectionPoolSnafu)?
             .with_invalid_type_action(self.invalid_type_action);
 
-        // instances.insert(key, pool.clone());
+        instances.insert(key, pool.clone());
 
         Ok(pool)
     }
@@ -229,7 +232,7 @@ impl DuckDBTableProviderFactory {
             .context(DbConnectionPoolSnafu)?
             .with_invalid_type_action(self.invalid_type_action);
 
-        // instances.insert(key, pool.clone());
+        instances.insert(key, pool.clone());
 
         Ok(pool)
     }
@@ -294,7 +297,7 @@ impl TableProviderFactory for DuckDBTableProviderFactory {
                     .map_err(to_datafusion_error)?
             }
             Mode::Memory => self
-                .get_or_init_memory_instance()
+                .get_or_init_memory_instance("test".to_string())
                 .await
                 .map_err(to_datafusion_error)?,
         };
