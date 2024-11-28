@@ -197,9 +197,11 @@ impl DuckDBTableProviderFactory {
         // let options = util::remove_prefix_from_hashmap_keys(options.clone(), "duckdb_");
         println!("after Options {:?}", options);
 
-        let memory_key = options
-            .get(DUCKDB_MEMORY_KEY_PARAM)
-            .unwrap_or(Err(Error::DuckDBInvalidMemoryKey {})?);
+        let memory_key = options.get(DUCKDB_MEMORY_KEY_PARAM);
+        if memory_key.is_none() {
+            return Err(Error::DuckDBInvalidMemoryKey {});
+        }
+        let memory_key = memory_key.unwrap();
 
         Ok(memory_key.to_string())
     }
