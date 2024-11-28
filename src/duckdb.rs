@@ -127,7 +127,7 @@ type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(Debug)]
 pub struct DuckDBTableProviderFactory {
     access_mode: AccessMode,
-    instances: Arc<Mutex<HashMap<DbInstanceKey, DuckDbConnectionPool>>>,
+    pub instances: Arc<Mutex<HashMap<DbInstanceKey, DuckDbConnectionPool>>>,
     invalid_type_action: InvalidTypeAction,
 }
 
@@ -195,7 +195,6 @@ impl DuckDBTableProviderFactory {
         options: &mut HashMap<String, String>,
     ) -> Result<String, Error> {
         // let options = util::remove_prefix_from_hashmap_keys(options.clone(), "duckdb_");
-        println!("after Options {:?}", options);
 
         let memory_key = options.get(DUCKDB_MEMORY_KEY_PARAM);
         if memory_key.is_none() {
@@ -317,7 +316,6 @@ impl TableProviderFactory for DuckDBTableProviderFactory {
                     .map_err(to_datafusion_error)?
             }
             Mode::Memory => {
-                println!("Creating memory instance {:?}", options);
                 let memory_key = self
                     .duckdb_memory_key(&mut options)
                     .map_err(to_datafusion_error)?;
