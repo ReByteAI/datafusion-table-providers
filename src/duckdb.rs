@@ -198,7 +198,7 @@ impl DuckDBTableProviderFactory {
             .context(DbConnectionPoolSnafu)?
             .with_invalid_type_action(self.invalid_type_action);
 
-        instances.insert(key, pool.clone());
+        // instances.insert(key, pool.clone());
 
         Ok(pool)
     }
@@ -229,7 +229,7 @@ impl DuckDBTableProviderFactory {
             .context(DbConnectionPoolSnafu)?
             .with_invalid_type_action(self.invalid_type_action);
 
-        instances.insert(key, pool.clone());
+        // instances.insert(key, pool.clone());
 
         Ok(pool)
     }
