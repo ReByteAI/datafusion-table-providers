@@ -144,6 +144,51 @@ macro_rules! handle_primitive_array_type {
     }};
 }
 
+macro_rules! get_value {
+    ($type:expr, $builder:expr, $row:expr, $i:expr, $builder_ty:ty, $value_ty:ty) => {{
+        let Some(builder) = $builder else {
+            return NoBuilderForIndexSnafu { index: $i }.fail();
+        };
+        let Some(builder) = builder.as_any_mut().downcast_mut::<$builder_ty>() else {
+            return FailedToDowncastBuilderSnafu {
+                postgres_type: format!("{:?}", $type),
+            }
+            .fail();
+        };
+        let v: Option<$value_ty> = $row.try_get($i).context(FailedToGetRowValueSnafu {
+            pg_type: $type.clone(),
+        })?;
+        Ok((builder, v))
+    }};
+}
+
+macro_rules! build_value {
+    ($get:expr, $f:expr) => {{
+        let (builder, v) = $get?;
+        builder.append_option(v.map($f))
+    }};
+}
+
+macro_rules! get_array {
+    ($type:expr, $builder:expr, $row:expr, $i:expr, $builder_ty:ty, $value_ty:ty) => {{
+        get_value!(
+            $type,
+            $builder,
+            $row,
+            $i,
+            ListBuilder<$builder_ty>,
+            Vec<$value_ty>
+        )
+    }};
+}
+
+macro_rules! build_array {
+    ($get:expr, $f:expr) => {{
+        let (builder, v) = $get?;
+        builder.append_option(v.map(|a| a.into_iter().map($f).map(Some)))
+    }};
+}
+
 macro_rules! handle_composite_type {
     ($BuilderType:ty, $ValueType:ty, $pg_type:expr, $composite_type:expr, $builder:expr, $idx:expr, $field_name:expr) => {{
         let Some(field_builder) = $builder.field_builder::<$BuilderType>($idx) else {
@@ -322,7 +367,7 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         None => builder.append_null(),
                     }
                 }
-                Type::JSON | Type::JSONB => {
+                Type::JSON => {
                     let Some(builder) = builder else {
                         return NoBuilderForIndexSnafu { index: i }.fail();
                     };
@@ -346,6 +391,10 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                         None => builder.append_null(),
                     }
                 }
+                Type::JSONB => build_value!(
+                    get_value!(postgres_type, builder, row, i, LargeStringBuilder, Value),
+                    |v| v.to_string()
+                ),
                 Type::TIME => {
                     let Some(builder) = builder else {
                         return NoBuilderForIndexSnafu { index: i }.fail();
@@ -680,6 +729,22 @@ pub fn rows_to_arrow(rows: &[Row], projected_schema: &Option<SchemaRef>) -> Resu
                     ListBuilder<BinaryBuilder>,
                     Vec<u8>
                 ),
+                Type::VARCHAR_ARRAY => build_array!(
+                    get_array!(postgres_type, builder, row, i, StringBuilder, String),
+                    |v| v
+                ),
+                Type::BPCHAR_ARRAY => build_array!(
+                    get_array!(postgres_type, builder, row, i, StringBuilder, String),
+                    |v| v.trim_end().to_string()
+                ),
+                Type::UUID_ARRAY => build_array!(
+                    get_array!(postgres_type, builder, row, i, StringBuilder, uuid::Uuid),
+                    |v| v.to_string()
+                ),
+                Type::JSON_ARRAY | Type::JSONB_ARRAY => build_array!(
+                    get_array!(postgres_type, builder, row, i, LargeStringBuilder, Value),
+                    |v| v.to_string()
+                ),
                 _ if matches!(postgres_type.name(), "geometry" | "geography") => {
                     let Some(builder) = builder else {
                         return NoBuilderForIndexSnafu { index: i }.fail();
@@ -887,6 +952,9 @@ fn map_column_type_to_data_type(column_type: &Type) -> Result<Option<DataType>> 
             DataType::Utf8,
             true,
         )))),
+        Type::VARCHAR_ARRAY | Type::BPCHAR_ARRAY | Type::UUID_ARRAY => Some(DataType::List(
+            Arc::new(Field::new("item", DataType::Utf8, true)),
+        )),
         Type::BOOL_ARRAY => Some(DataType::List(Arc::new(Field::new(
             "item",
             DataType::Boolean,
@@ -895,6 +963,11 @@ fn map_column_type_to_data_type(column_type: &Type) -> Result<Option<DataType>> 
         Type::BYTEA_ARRAY => Some(DataType::List(Arc::new(Field::new(
             "item",
             DataType::Binary,
+            true,
+        )))),
+        Type::JSON_ARRAY | Type::JSONB_ARRAY => Some(DataType::List(Arc::new(Field::new(
+            "item",
+            DataType::LargeUtf8,
             true,
         )))),
         _ if matches!(column_type.name(), "geometry" | "geography") => Some(DataType::Binary),
