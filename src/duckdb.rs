@@ -225,22 +225,24 @@ impl DuckDBTableProviderFactory {
         Ok(pool)
     }
 
-    pub async fn remove_instance(&self, db_path: impl Into<Arc<str>>, mode: Mode) -> Result<()> {
-        let db_path = db_path.into();
-        if mode == Mode::Memory {
-            let key = DbInstanceKey::memory(db_path.to_string());
-            let mut instances = self.instances.lock().await;
-
-            if let Some(instance) = instances.remove(&key) {}
-        } else {
-            let key = DbInstanceKey::file(Arc::clone(&db_path));
-            let mut instances = self.instances.lock().await;
-
-            if let Some(instance) = instances.remove(&key) {}
-        }
-
-        Ok(())
-    }
+    // pub async fn remove_instance(&self,
+    //                              db_instance_key: DbInstanceKey) -> Result<()> {
+    //     // let db_path = db_path.into();
+    //     // if mode == Mode::Memory {
+    //     //     let key = DbInstanceKey::memory(Arc::clone(&db_path));
+    //     //     let mut instances = self.instances.lock().await;
+    //     //
+    //     //     if let Some(instance) = instances.remove(&key) {}
+    //     // } else {
+    //     //
+    //     // }
+    //     // let key = DbInstanceKey::file(Arc::clone(&db_path));
+    //     let mut instances = self.instances.lock().await;
+    //
+    //     if let Some(instance) = instances.remove(&key) {}
+    //
+    //     Ok(())
+    // }
 
     pub async fn get_or_init_file_instance(
         &self,
