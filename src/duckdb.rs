@@ -194,7 +194,8 @@ impl DuckDBTableProviderFactory {
         &self,
         options: &mut HashMap<String, String>,
     ) -> Result<String, Error> {
-        let options = util::remove_prefix_from_hashmap_keys(options.clone(), "duckdb_");
+        // let options = util::remove_prefix_from_hashmap_keys(options.clone(), "duckdb_");
+        println!("after Options {:?}", options);
 
         let memory_key = options
             .get(DUCKDB_MEMORY_KEY_PARAM)
@@ -314,6 +315,7 @@ impl TableProviderFactory for DuckDBTableProviderFactory {
                     .map_err(to_datafusion_error)?
             }
             Mode::Memory => {
+                println!("Creating memory instance {:?}", options);
                 let memory_key = self
                     .duckdb_memory_key(&mut options)
                     .map_err(to_datafusion_error)?;
