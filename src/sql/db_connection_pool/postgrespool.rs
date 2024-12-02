@@ -81,6 +81,11 @@ pub struct PostgresConnectionPool {
     join_push_down: JoinPushDown,
 }
 
+fn escape(value: &str) -> String {
+    let value = value.replace("\\", "\\\\").replace("'", "\\'");
+    return format!("'{}'", value);
+}
+
 impl PostgresConnectionPool {
     /// Creates a new instance of `PostgresConnectionPool`.
     ///
@@ -111,15 +116,19 @@ impl PostgresConnectionPool {
             }
         } else {
             if let Some(pg_host) = params.get("host").map(Secret::expose_secret) {
+                let pg_host = escape(pg_host);
                 connection_string.push_str(format!("host={pg_host} ").as_str());
             }
             if let Some(pg_user) = params.get("user").map(Secret::expose_secret) {
+                let pg_user = escape(pg_user);
                 connection_string.push_str(format!("user={pg_user} ").as_str());
             }
             if let Some(pg_db) = params.get("db").map(Secret::expose_secret) {
+                let pg_db = escape(pg_db);
                 connection_string.push_str(format!("dbname={pg_db} ").as_str());
             }
             if let Some(pg_pass) = params.get("pass").map(Secret::expose_secret) {
+                let pg_pass = escape(pg_pass);
                 connection_string.push_str(format!("password={pg_pass} ").as_str());
             }
             if let Some(pg_port) = params.get("port").map(Secret::expose_secret) {
