@@ -31,7 +31,8 @@ pub enum Error {
         field_name: String,
     },
 
-    #[snafu(display("Failed to execute query.\n{source}"))]
+    // #[snafu(display("Failed to execute query.\n{source}"))]
+    #[snafu(display("Unable to query arrow: {source}"))]
     UnableToQueryArrow { source: GenericError },
 
     #[snafu(display(

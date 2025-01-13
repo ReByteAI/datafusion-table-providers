@@ -61,6 +61,9 @@ pub enum Error {
         source: sql_provider_datafusion::Error,
     },
 
+    #[snafu(display("DuckDBInvalidMemoryKey"))]
+    DuckDBInvalidMemoryKey {},
+
     #[snafu(display("Unable to downcast DbConnection to DuckDbConnection"))]
     UnableToDowncastDbConnection {},
 
@@ -128,7 +131,7 @@ type Result<T, E = Error> = std::result::Result<T, E>;
 
 pub struct DuckDBTableProviderFactory {
     access_mode: AccessMode,
-    instances: Arc<Mutex<HashMap<DbInstanceKey, DuckDbConnectionPool>>>,
+    pub instances: Arc<Mutex<HashMap<DbInstanceKey, DuckDbConnectionPool>>>,
     invalid_type_action: InvalidTypeAction,
     dialect: Arc<dyn Dialect>,
 }
@@ -145,6 +148,7 @@ impl std::fmt::Debug for DuckDBTableProviderFactory {
 }
 
 const DUCKDB_DB_PATH_PARAM: &str = "open";
+const DUCKDB_MEMORY_KEY_PARAM: &str = "memory_key";
 const DUCKDB_DB_BASE_FOLDER_PARAM: &str = "data_directory";
 const DUCKDB_ATTACH_DATABASES_PARAM: &str = "attach_databases";
 
@@ -209,8 +213,24 @@ impl DuckDBTableProviderFactory {
         Ok(filepath.to_string())
     }
 
-    pub async fn get_or_init_memory_instance(&self) -> Result<DuckDbConnectionPool> {
-        let key = DbInstanceKey::memory();
+    pub fn duckdb_memory_key(
+        &self,
+        options: &mut HashMap<String, String>,
+    ) -> Result<String, Error> {
+        let memory_key = options.get(DUCKDB_MEMORY_KEY_PARAM);
+        if memory_key.is_none() {
+            return Err(Error::DuckDBInvalidMemoryKey {});
+        }
+        let memory_key = memory_key.unwrap();
+
+        Ok(memory_key.to_string())
+    }
+
+    pub async fn get_or_init_memory_instance(
+        &self,
+        db_memory_key: String,
+    ) -> Result<DuckDbConnectionPool> {
+        let key = DbInstanceKey::memory(db_memory_key);
         let mut instances = self.instances.lock().await;
 
         if let Some(instance) = instances.get(&key) {
@@ -315,10 +335,15 @@ impl TableProviderFactory for DuckDBTableProviderFactory {
                     .await
                     .map_err(to_datafusion_error)?
             }
-            Mode::Memory => self
-                .get_or_init_memory_instance()
-                .await
-                .map_err(to_datafusion_error)?,
+            Mode::Memory => {
+                let memory_key = self
+                    .duckdb_memory_key(&mut options)
+                    .map_err(to_datafusion_error)?;
+
+                self.get_or_init_memory_instance(memory_key)
+                    .await
+                    .map_err(to_datafusion_error)?
+            }
         };
 
         let read_pool = match &mode {
@@ -500,7 +525,7 @@ fn remove_option(options: &mut HashMap<String, String>, key: &str) -> Option<Str
 }
 
 pub struct DuckDBTableFactory {
-    pool: Arc<DuckDbConnectionPool>,
+    pub pool: Arc<DuckDbConnectionPool>,
     dialect: Arc<dyn Dialect>,
 }
 
