@@ -191,7 +191,7 @@ impl SchemaValidator for DuckDbConnection {
                     | DataType::Utf8View
                     | DataType::BinaryView
                     | DataType::Boolean => true,
-                    _ => false, // nested lists don't support anything else yet
+                    _ => true, //false, // nested lists don't support anything else yet
                 }
             }
             DataType::Struct(inner_fields) => inner_fields
