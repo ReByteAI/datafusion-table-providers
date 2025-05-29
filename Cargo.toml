@@ -18,13 +18,13 @@ base64 = { version = "0.22.1", optional = true }
 bytes = { version = "1.7.1", optional = true }
 bigdecimal = "0.4.5"
 byteorder = "1.5.0"
-chrono = "0.4.38"
+chrono = "= 0.4.38"
 datafusion = "43"
 datafusion-expr = { version = "43", optional = true }
 datafusion-physical-expr = { version = "43", optional = true }
 datafusion-physical-plan = { version = "43", optional = true }
 datafusion-proto = { version = "43", optional = true }
-duckdb = { version = "1", features = [
+duckdb = { version = "1.2.0", features = [
   "bundled",
   "r2d2",
   "vtab",
@@ -101,7 +101,7 @@ postgres-federation = ["postgres"]
 
 [patch.crates-io]
 datafusion-federation = { git = "https://github.com/spiceai/datafusion-federation.git", rev = "4e65b2b5ce4aa58143e7e5cbf2ea56c60eb1a060" }
-duckdb = { git = "https://github.com/spiceai/duckdb-rs.git", rev = "ffb4e4d5b73db64178a641e7c6980f4bfe5eef18" }
+duckdb = { git = "https://github.com/spiceai/duckdb-rs.git", rev = "403eb967d8af171abeeba8ebcc165fc5a3864ff1" }
 
 datafusion = { git = "https://github.com/spiceai/datafusion.git", rev = "37f0f144650db9e07a09c02fdbb69179438316be"}
 datafusion-expr =  { git = "https://github.com/spiceai/datafusion.git", rev = "37f0f144650db9e07a09c02fdbb69179438316be"}
