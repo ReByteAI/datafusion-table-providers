@@ -25,7 +25,7 @@ datafusion-physical-expr = { version = "43", optional = true }
 datafusion-physical-plan = { version = "43", optional = true }
 datafusion-proto = { version = "43", optional = true }
 duckdb = { version = "1.2.0", features = [
-  "bundled",
+  # "bundled",
   "r2d2",
   "vtab",
   "vtab-arrow",
